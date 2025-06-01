@@ -50,7 +50,7 @@ public class Main {
             UserInputHandler userInputHandler = new UserInputHandler(lineReader);
 
             // 7. Создаем ScriptRunner
-            ScriptRunner scriptRunner = new ScriptRunner(commandManager, userInputHandler, terminal);
+            ScriptRunner scriptRunner = new ScriptRunner(commandManager, terminal);
             commandManager.setScriptRunner(scriptRunner);
 
             // 8. Создаем ConsoleApplication

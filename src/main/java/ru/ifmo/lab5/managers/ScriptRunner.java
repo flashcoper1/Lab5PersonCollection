@@ -2,77 +2,99 @@ package ru.ifmo.lab5.managers;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.UserInterruptException;
-import org.jline.terminal.Terminal;
+import org.jline.terminal.Terminal; // Terminal все еще нужен для ExecuteScriptCommand
 import ru.ifmo.lab5.commands.Command;
-// ExecuteScriptCommand не нужен здесь как зависимость конструктора
 
 import java.io.File;
 import java.io.FileNotFoundException;
-// import java.io.IOException; // Не используется напрямую здесь
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
 /**
  * Выполняет команды из скрипт-файла.
+ * Реализует "тихий режим" для стандартного вывода команд, выполняемых из скрипта.
+ * Ошибки выводятся в стандартный поток ошибок.
  */
 public class ScriptRunner {
     private final CommandManager commandManager;
-    private final UserInputHandler mainUserInputHandler; // Для интерактивного ввода из скрипта
-    private final Terminal mainTerminal; // Для передачи вложенным ExecuteScriptCommand
+    // private final UserInputHandler mainUserInputHandler; // <-- УДАЛЯЕМ ЭТО ПОЛЕ
+    private final Terminal mainTerminal; // Оставляем, если ExecuteScriptCommand его использует косвенно или для будущих нужд
     private final Set<String> runningScripts = new HashSet<>();
 
+    private final PrintStream originalSystemOut = System.out;
+    private final PrintStream originalSystemErr = System.err;
+
     /**
-     * Конструктор.
-     * @param commandManager Менеджер команд.
-     * @param mainUserInputHandler Основной обработчик ввода (с JLine консоли).
-     * @param mainTerminal Основной терминал.
+     * Конструктор для {@code ScriptRunner}.
+     *
+     * @param commandManager менеджер команд для поиска и выполнения команд.
+     * @param mainTerminal основной терминал (может быть нужен для вложенных скриптов или специфичных команд).
      */
-    public ScriptRunner(CommandManager commandManager, UserInputHandler mainUserInputHandler, Terminal mainTerminal) {
+    public ScriptRunner(CommandManager commandManager, /* UserInputHandler mainUserInputHandler, */ Terminal mainTerminal) {
         this.commandManager = commandManager;
-        this.mainUserInputHandler = mainUserInputHandler; // Сохраняем для команд, требующих ввода
-        this.mainTerminal = mainTerminal; // Сохраняем для передачи вложенным скриптам
+        // this.mainUserInputHandler = mainUserInputHandler; // <-- УДАЛЯЕМ ПРИСВОЕНИЕ
+        this.mainTerminal = mainTerminal;
     }
 
     /**
      * Выполняет скрипт из указанного файла.
-     * @param filePath Путь к файлу скрипта.
+     * Стандартный вывод команд из скрипта подавляется. Ошибки выводятся в {@code System.err}.
+     * Команды, требующие интерактивного ввода, будут использовать {@code UserInputHandler},
+     * который был им передан при их создании.
+     *
+     * @param filePath путь к файлу скрипта.
      */
-    public void executeScript(String filePath) {
+    public void executeScript(String filePath) { // Убрали mainUserInputHandler из параметров, так как он не используется здесь напрямую
         File scriptFile = new File(filePath);
         String absolutePath;
         try {
             absolutePath = scriptFile.getCanonicalPath();
         } catch (Exception e) {
-            System.err.println("Ошибка при получении канонического пути к файлу скрипта '" + filePath + "': " + e.getMessage());
+            originalSystemErr.println("Ошибка при получении канонического пути к файлу скрипта '" + filePath + "': " + e.getMessage());
             return;
         }
 
+        // ... (остальная часть метода executeScript остается такой же, как в предыдущем ответе) ...
+        // Важно, что команды, вызываемые через command.execute(cmdArguments),
+        // уже имеют свой экземпляр UserInputHandler (который является mainUserInputHandler).
+        // ScriptRunner'у не нужно его передавать или использовать напрямую.
+
         if (!scriptFile.exists() || !scriptFile.isFile()) {
-            System.err.println("Файл скрипта не найден или не является файлом: " + absolutePath);
+            originalSystemErr.println("Файл скрипта не найден или не является файлом: " + absolutePath);
             return;
         }
         if (!scriptFile.canRead()) {
-            System.err.println("Нет прав на чтение файла скрипта: " + absolutePath);
+            originalSystemErr.println("Нет прав на чтение файла скрипта: " + absolutePath);
             return;
         }
 
         if (runningScripts.contains(absolutePath)) {
-            System.err.println("Обнаружена рекурсия! Скрипт " + absolutePath + " уже выполняется.");
+            originalSystemErr.println("Обнаружена рекурсия! Скрипт " + absolutePath + " уже выполняется.");
             return;
         }
         runningScripts.add(absolutePath);
 
-        System.out.println("--- Начало выполнения скрипта: " + absolutePath + " ---");
-        // UserInputHandler для команд из скрипта будет mainUserInputHandler,
-        // что означает, что если команда (например, add) потребует ввода, он будет из консоли.
+        originalSystemOut.println("--- Начало выполнения скрипта (тихий режим для stdout): " + absolutePath + " ---");
+
+        PrintStream dummyStream = new PrintStream(new OutputStream() {
+            @Override public void write(int b) { /* Поглощаем */ }
+        });
+        PrintStream oldSystemOut = System.out;
+
+        System.setOut(dummyStream);
+        // ScriptRunner.forcedOutput больше не используется, если мы отказались от того подхода
+        // Если вы оставили тот подход, то здесь нужно было бы установить ScriptRunner.forcedOutput = originalSystemOut;
+
         try (Scanner scriptScanner = new Scanner(scriptFile, "UTF-8")) {
             while (scriptScanner.hasNextLine()) {
                 String line = scriptScanner.nextLine().trim();
                 if (line.isEmpty() || line.startsWith("#")) {
                     continue;
                 }
-                System.out.println("СКРИПТ> " + line);
+                originalSystemOut.println("СКРИПТ> " + line);
 
                 String[] parts = line.split("\\s+", 2);
                 String commandName = parts[0].toLowerCase();
@@ -81,32 +103,27 @@ public class ScriptRunner {
                 Command command = commandManager.getCommand(commandName);
                 if (command != null) {
                     try {
-                        // Команды, созданные в ConsoleApplication, уже имеют ссылку на mainUserInputHandler
-                        // через CommandManager -> ConsoleApplication -> конструкторы команд.
-                        // ExecuteScriptCommand получит этот ScriptRunner (this) и вызовет executeScript рекурсивно.
                         command.execute(cmdArguments);
-                    } catch (EndOfFileException e) {
-                        System.err.println("Ввод для команды '" + commandName + "' в скрипте был прерван (EOF). Выполнение скрипта остановлено.");
-                        break;
-                    } catch (UserInterruptException e) {
-                        System.err.println("Ввод для команды '" + commandName + "' в скрипте был прерван (Ctrl+C). Выполнение скрипта остановлено.");
+                    } catch (EndOfFileException | UserInterruptException e) {
+                        originalSystemErr.println("Ввод для команды '" + commandName + "' в скрипте был прерван. Выполнение скрипта остановлено.");
                         break;
                     } catch (Exception e) {
                         System.err.println("Ошибка при выполнении команды '" + commandName + "' из скрипта: " + e.getMessage());
-                        // e.printStackTrace(); // Для отладки
                     }
                 } else {
                     System.err.println("Неизвестная команда в скрипте: " + commandName);
                 }
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Файл скрипта не найден (неожиданно после проверок): " + absolutePath);
+            System.err.println("Файл скрипта не найден: " + absolutePath);
         } catch (Exception e) {
             System.err.println("Критическая ошибка во время выполнения скрипта '" + absolutePath + "': " + e.getMessage());
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         } finally {
+            System.setOut(oldSystemOut);
+            // ScriptRunner.forcedOutput = null; // Если использовался статический forcedOutput
             runningScripts.remove(absolutePath);
-            System.out.println("--- Завершение выполнения скрипта: " + absolutePath + " ---");
+            originalSystemOut.println("--- Завершение выполнения скрипта: " + absolutePath + " ---");
         }
     }
 }

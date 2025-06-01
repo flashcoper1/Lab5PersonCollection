@@ -35,8 +35,6 @@ public class XmlFileManager {
         @XmlElement(name = "person")
         private TreeSet<Person> persons = new TreeSet<>();
 
-        public PersonWrapper() {}
-
         public PersonWrapper(TreeSet<Person> persons) {
             this.persons = persons;
         }
