@@ -2,26 +2,40 @@ package ru.ifmo.lab5;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
-// import org.jline.reader.impl.completer.StringsCompleter; // Больше не нужен для основного комплетера
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import ru.ifmo.lab5.commands.ExecuteScriptCommand;
-import ru.ifmo.lab5.managers.*; // Импортируем CommandCompleter
-import ru.ifmo.lab5.util.*;
-import java.io.IOException;
-// import java.util.stream.Collectors; // Больше не нужен для StringsCompleter
+import ru.ifmo.lab5.managers.*;
+import ru.ifmo.lab5.util.CommandCompleter;
 
+import java.io.IOException;
+import java.util.stream.Collectors;
+
+/**
+ * Главный класс приложения. Инициализирует все компоненты и запускает консольное приложение.
+ */
 public class Main {
+    /**
+     * Точка входа в программу.
+     * Инициализирует менеджеры, JLine для консольного ввода, регистрирует команды
+     * и запускает основной цикл обработки команд.
+     * Ожидает путь к файлу коллекции через переменную окружения PERSON_COLLECTION_FILE.
+     *
+     * @param args аргументы командной строки (не используются).
+     */
     public static void main(String[] args) {
         String filePath = System.getenv("PERSON_COLLECTION_FILE");
         if (filePath == null || filePath.trim().isEmpty()) {
             System.err.println("Ошибка: Переменная окружения PERSON_COLLECTION_FILE не установлена или пуста.");
-            // ... (сообщения пользователю)
+            System.err.println("Пожалуйста, установите ее и укажите путь к XML файлу коллекции.");
+            System.err.println("Пример (Linux/macOS): export PERSON_COLLECTION_FILE=\"/путь/к/вашему/файлу.xml\"");
+            System.err.println("Пример (Windows CMD): set PERSON_COLLECTION_FILE=\"C:\\путь\\к\\вашему\\файлу.xml\"");
+            System.err.println("Пример (Windows PowerShell): $env:PERSON_COLLECTION_FILE=\"C:\\путь\\к\\вашему\\файлу.xml\"");
             return;
         }
 
         Terminal terminal = null;
-        ConsoleApplication app = null;
+        // ConsoleApplication app; // Инициализатор 'null' избыточен, убрали
 
         try {
             // 1. Создаем Terminal
@@ -41,7 +55,7 @@ public class Main {
             // 5. Создаем LineReader и СРАЗУ устанавливаем ему наш CommandCompleter
             LineReader lineReader = LineReaderBuilder.builder()
                     .terminal(terminal)
-                    .completer(commandCompleter) // Используем наш кастомный комплетер
+                    .completer(commandCompleter)
                     .history(new org.jline.reader.impl.history.DefaultHistory())
                     .variable(LineReader.HISTORY_FILE, ".person_app_history")
                     .build();
@@ -50,11 +64,11 @@ public class Main {
             UserInputHandler userInputHandler = new UserInputHandler(lineReader);
 
             // 7. Создаем ScriptRunner
-            ScriptRunner scriptRunner = new ScriptRunner(commandManager, terminal);
+            ScriptRunner scriptRunner = new ScriptRunner(commandManager); // Убрали terminal из конструктора
             commandManager.setScriptRunner(scriptRunner);
 
             // 8. Создаем ConsoleApplication
-            app = new ConsoleApplication(
+            ConsoleApplication app = new ConsoleApplication( // Объявляем и инициализируем здесь
                     collectionManager,
                     commandManager,
                     xmlFileManager,
@@ -67,15 +81,18 @@ public class Main {
             app.registerCommands();
             commandManager.register("execute_script", new ExecuteScriptCommand(scriptRunner));
 
-            // 10. Комплетер уже установлен и будет динамически брать команды из commandManager.
-            // Строка lineReader.setCompleter(...) больше не нужна и удалена.
+            // 10. Комплетер уже установлен.
 
             app.run();
 
         } catch (IOException e) {
             System.err.println("Критическая ошибка при инициализации JLine терминала: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
+            logError(e); // Используем свой метод логирования
+        } catch (Exception e) { // Общий перехват на случай других ошибок инициализации
+            System.err.println("Непредвиденная критическая ошибка при запуске приложения: " + e.getMessage());
+            logError(e);
+        }
+        finally {
             if (terminal != null) {
                 try {
                     terminal.close();
@@ -83,6 +100,18 @@ public class Main {
                     System.err.println("Ошибка при закрытии терминала: " + e.getMessage());
                 }
             }
+        }
+    }
+
+    /**
+     * Вспомогательный метод для логирования исключений в Main.
+     * @param e Исключение для логирования.
+     */
+    private static void logError(Exception e) {
+        // В реальном приложении здесь мог бы быть вызов логгера
+        System.err.println("Подробности ошибки: ");
+        for (StackTraceElement ste : e.getStackTrace()) {
+            System.err.println("\t_ " + ste.toString());
         }
     }
 }

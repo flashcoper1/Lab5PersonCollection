@@ -2,13 +2,15 @@ package ru.ifmo.lab5.managers;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.UserInterruptException;
-import org.jline.terminal.Terminal; // Terminal все еще нужен для ExecuteScriptCommand
+// import org.jline.terminal.Terminal; // Больше не нужен здесь
 import ru.ifmo.lab5.commands.Command;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets; // Импорт для StandardCharsets
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -20,8 +22,7 @@ import java.util.Set;
  */
 public class ScriptRunner {
     private final CommandManager commandManager;
-    // private final UserInputHandler mainUserInputHandler; // <-- УДАЛЯЕМ ЭТО ПОЛЕ
-    private final Terminal mainTerminal; // Оставляем, если ExecuteScriptCommand его использует косвенно или для будущих нужд
+    // private final Terminal mainTerminal; // УДАЛЕНО
     private final Set<String> runningScripts = new HashSet<>();
 
     private final PrintStream originalSystemOut = System.out;
@@ -31,12 +32,10 @@ public class ScriptRunner {
      * Конструктор для {@code ScriptRunner}.
      *
      * @param commandManager менеджер команд для поиска и выполнения команд.
-     * @param mainTerminal основной терминал (может быть нужен для вложенных скриптов или специфичных команд).
      */
-    public ScriptRunner(CommandManager commandManager, /* UserInputHandler mainUserInputHandler, */ Terminal mainTerminal) {
+    public ScriptRunner(CommandManager commandManager /*, Terminal mainTerminal */) { // mainTerminal убран из конструктора
         this.commandManager = commandManager;
-        // this.mainUserInputHandler = mainUserInputHandler; // <-- УДАЛЯЕМ ПРИСВОЕНИЕ
-        this.mainTerminal = mainTerminal;
+        // this.mainTerminal = mainTerminal; // УДАЛЕНО
     }
 
     /**
@@ -47,7 +46,7 @@ public class ScriptRunner {
      *
      * @param filePath путь к файлу скрипта.
      */
-    public void executeScript(String filePath) { // Убрали mainUserInputHandler из параметров, так как он не используется здесь напрямую
+    public void executeScript(String filePath) {
         File scriptFile = new File(filePath);
         String absolutePath;
         try {
@@ -56,11 +55,6 @@ public class ScriptRunner {
             originalSystemErr.println("Ошибка при получении канонического пути к файлу скрипта '" + filePath + "': " + e.getMessage());
             return;
         }
-
-        // ... (остальная часть метода executeScript остается такой же, как в предыдущем ответе) ...
-        // Важно, что команды, вызываемые через command.execute(cmdArguments),
-        // уже имеют свой экземпляр UserInputHandler (который является mainUserInputHandler).
-        // ScriptRunner'у не нужно его передавать или использовать напрямую.
 
         if (!scriptFile.exists() || !scriptFile.isFile()) {
             originalSystemErr.println("Файл скрипта не найден или не является файлом: " + absolutePath);
@@ -83,12 +77,9 @@ public class ScriptRunner {
             @Override public void write(int b) { /* Поглощаем */ }
         });
         PrintStream oldSystemOut = System.out;
-
         System.setOut(dummyStream);
-        // ScriptRunner.forcedOutput больше не используется, если мы отказались от того подхода
-        // Если вы оставили тот подход, то здесь нужно было бы установить ScriptRunner.forcedOutput = originalSystemOut;
 
-        try (Scanner scriptScanner = new Scanner(scriptFile, "UTF-8")) {
+        try (Scanner scriptScanner = new Scanner(scriptFile, StandardCharsets.UTF_8)) { // Используем StandardCharsets.UTF_8
             while (scriptScanner.hasNextLine()) {
                 String line = scriptScanner.nextLine().trim();
                 if (line.isEmpty() || line.startsWith("#")) {
@@ -118,12 +109,24 @@ public class ScriptRunner {
             System.err.println("Файл скрипта не найден: " + absolutePath);
         } catch (Exception e) {
             System.err.println("Критическая ошибка во время выполнения скрипта '" + absolutePath + "': " + e.getMessage());
-            e.printStackTrace(System.err);
+            // Заменяем e.printStackTrace() на более контролируемый вывод или логирование
+            logError(e); // Пример вызова метода логирования
         } finally {
             System.setOut(oldSystemOut);
-            // ScriptRunner.forcedOutput = null; // Если использовался статический forcedOutput
             runningScripts.remove(absolutePath);
             originalSystemOut.println("--- Завершение выполнения скрипта: " + absolutePath + " ---");
+        }
+    }
+
+    /**
+     * Вспомогательный метод для логирования исключений.
+     * Вместо прямого вызова e.printStackTrace().
+     * @param e Исключение для логирования.
+     */
+    private void logError(Exception e) {
+        originalSystemErr.println("Критическая ошибка: " + e.getMessage());
+        for (StackTraceElement ste : e.getStackTrace()) {
+            originalSystemErr.println("\t_ " + ste.toString());
         }
     }
 }
