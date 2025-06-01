@@ -2,12 +2,10 @@ package ru.ifmo.lab5.managers;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.UserInterruptException;
-// import org.jline.terminal.Terminal; // Больше не нужен здесь
 import ru.ifmo.lab5.commands.Command;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets; // Импорт для StandardCharsets

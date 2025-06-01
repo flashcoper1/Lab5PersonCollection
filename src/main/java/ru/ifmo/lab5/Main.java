@@ -9,7 +9,6 @@ import ru.ifmo.lab5.managers.*;
 import ru.ifmo.lab5.util.CommandCompleter;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * Главный класс приложения. Инициализирует все компоненты и запускает консольное приложение.

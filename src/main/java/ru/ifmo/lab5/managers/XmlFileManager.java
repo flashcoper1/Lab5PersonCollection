@@ -35,6 +35,11 @@ public class XmlFileManager {
         @XmlElement(name = "person")
         private TreeSet<Person> persons = new TreeSet<>();
 
+        public PersonWrapper() {
+            // Инициализация persons здесь не обязательна, если она есть при объявлении поля,
+            // но и не повредит.
+        }
+
         public PersonWrapper(TreeSet<Person> persons) {
             this.persons = persons;
         }
@@ -42,6 +47,7 @@ public class XmlFileManager {
         public TreeSet<Person> getPersons() {
             return persons;
         }
+
     }
 
     /**
