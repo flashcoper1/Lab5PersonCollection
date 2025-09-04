@@ -2,15 +2,16 @@ package ru.ifmo.lab5.commands;
 
 import ru.ifmo.lab5.managers.CollectionManager;
 import ru.ifmo.lab5.model.Person;
+import ru.ifmo.lab5.util.CommandResult;
 
 /**
- * Команда для вывода всех элементов коллекции.
+ * Команда для вывода всех элементов коллекции в строковом представлении.
  */
 public class ShowCommand implements Command {
     private final CollectionManager collectionManager;
 
     /**
-     * Конструктор.
+     * Конструктор команды.
      * @param collectionManager Менеджер коллекции.
      */
     public ShowCommand(CollectionManager collectionManager) {
@@ -18,16 +19,21 @@ public class ShowCommand implements Command {
     }
 
     @Override
-    public void execute(String arguments) {
+    public CommandResult execute(String arguments) {
         if (collectionManager.getCollection().isEmpty()) {
-            System.out.println("Коллекция пуста.");
-            return;
+            return CommandResult.success("Коллекция пуста.");
         }
-        System.out.println("Элементы коллекции:");
+
+        StringBuilder sb = new StringBuilder("Элементы коллекции:\n");
         for (Person person : collectionManager.getCollection()) {
-            System.out.println(person.toString());
-            System.out.println("---");
+            sb.append(person.toString()).append("\n");
+            sb.append("---\n");
         }
+        // Убираем последний разделитель "---"
+        if (sb.length() > 4) {
+            sb.setLength(sb.length() - 5);
+        }
+        return CommandResult.success(sb.toString());
     }
 
     @Override

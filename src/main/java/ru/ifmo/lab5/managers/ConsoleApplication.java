@@ -3,40 +3,40 @@ package ru.ifmo.lab5.managers;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
 import ru.ifmo.lab5.commands.*;
-
-import java.io.IOException; // Для Terminal.close()
+import ru.ifmo.lab5.util.CommandResult;
+import ru.ifmo.lab5.util.CommandStatus;
 
 /**
- * Основной класс приложения, управляющий циклом ввода команд.
+ * Основной класс приложения. Управляет жизненным циклом,
+ * читает команды из консоли, выполняет их и выводит результат.
  */
 public class ConsoleApplication {
-    private final CollectionManager collectionManager;
     private final CommandManager commandManager;
-    private final XmlFileManager xmlFileManager;
     private final UserInputHandler userInputHandler;
     private final LineReader lineReader;
-    private final Terminal terminal; // Сохраняем для корректного закрытия
     private boolean running = true;
 
     /**
-     * Конструктор.
+     * Конструктор приложения.
+     * @param commandManager Менеджер команд.
+     * @param userInputHandler Обработчик пользовательского ввода.
+     * @param lineReader JLine ридер для интерактивной консоли.
      */
-    public ConsoleApplication(CollectionManager collectionManager, CommandManager commandManager,
-                              XmlFileManager xmlFileManager, UserInputHandler userInputHandler,
-                              LineReader lineReader, Terminal terminal) {
-        this.collectionManager = collectionManager;
+    public ConsoleApplication(CommandManager commandManager, UserInputHandler userInputHandler,
+                              LineReader lineReader) {
         this.commandManager = commandManager;
-        this.xmlFileManager = xmlFileManager;
         this.userInputHandler = userInputHandler;
         this.lineReader = lineReader;
-        this.terminal = terminal;
     }
 
     /**
-     * Регистрирует все команды в CommandManager.
-     * Этот метод должен вызываться после создания всех менеджеров.
+     * Регистрирует все доступные команды в {@link CommandManager}.
      */
     public void registerCommands() {
+        CollectionManager collectionManager = commandManager.getCollectionManager();
+        XmlFileManager xmlFileManager = commandManager.getXmlFileManager();
+        ScriptRunner scriptRunner = commandManager.getScriptRunner();
+
         commandManager.register("help", new HelpCommand(commandManager));
         commandManager.register("info", new InfoCommand(collectionManager));
         commandManager.register("show", new ShowCommand(collectionManager));
@@ -52,51 +52,39 @@ public class ConsoleApplication {
         commandManager.register("average_of_height", new AverageOfHeightCommand(collectionManager));
         commandManager.register("count_by_hair_color", new CountByHairColorCommand(collectionManager, userInputHandler));
         commandManager.register("filter_less_than_hair_color", new FilterLessThanHairColorCommand(collectionManager, userInputHandler));
-        // ExecuteScriptCommand регистрируется в Main
+        commandManager.register("execute_script", new ExecuteScriptCommand(scriptRunner));
     }
 
+    /**
+     * Запускает главный цикл приложения.
+     */
     public void run() {
-        System.out.println("Консольное приложение для управления коллекцией Person (с JLine).");
-        System.out.println("Введите 'help' для получения списка команд. Используйте Tab для автодополнения, стрелки вверх/вниз для истории.");
-
-        String line;
+        System.out.println("Консольное приложение для управления коллекцией Person.");
+        System.out.println("Введите 'help' для получения списка команд. Используйте Tab для автодополнения.");
 
         while (running) {
             try {
-                line = lineReader.readLine("> ");
-                if (line == null) {
-                    System.out.println("\nПолучен сигнал EOF (Ctrl+D).");
-                    handleExitRequest(true);
+                String line = lineReader.readLine("> ");
+                if (line == null) { // Ctrl+D
                     break;
                 }
                 line = line.trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
+                if (line.isEmpty()) continue;
+
                 processCommand(line);
-            } catch (UserInterruptException e) {
-                System.out.println("^C");
-            } catch (EndOfFileException e) {
-                System.out.println("\nВвод завершен (EOF).");
-                handleExitRequest(true);
+
+            } catch (UserInterruptException e) { // Ctrl+C
+                System.out.println("\n^C. Для выхода введите 'exit'.");
+            } catch (EndOfFileException e) { // Ctrl+D
                 break;
-            } catch (Exception e) {
-                System.err.println("Произошла непредвиденная ошибка в главном цикле: " + e.getMessage());
-                e.printStackTrace();
             }
         }
-        System.out.println("Программа завершена.");
     }
 
-    private void handleExitRequest(boolean saveOnExit) {
-        if (saveOnExit) {
-            System.out.println("Попытка сохранить коллекцию перед выходом...");
-            xmlFileManager.save(collectionManager.getCollection());
-        } else {
-            System.out.println("Завершение программы без сохранения (по команде exit).");
-        }
-    }
-
+    /**
+     * Обрабатывает одну строку с командой.
+     * @param line Введенная пользователем строка.
+     */
     public void processCommand(String line) {
         String[] parts = line.split("\\s+", 2);
         String commandName = parts[0].toLowerCase();
@@ -104,21 +92,24 @@ public class ConsoleApplication {
 
         Command command = commandManager.getCommand(commandName);
         if (command != null) {
-            try {
-                command.execute(arguments);
-            } catch (EndOfFileException e) {
-                System.err.println("Ввод для команды '" + commandName + "' был прерван (EOF).");
-            } catch (UserInterruptException e) {
-                System.err.println("Ввод для команды '" + commandName + "' был прерван (Ctrl+C).");
-            }
-            catch (Exception e) {
-                System.err.println("Ошибка при выполнении команды '" + commandName + "': " + e.getMessage());
+            CommandResult result = command.execute(arguments);
+
+            if (result.getStatus() == CommandStatus.SUCCESS) {
+                if (result.getMessage() != null && !result.getMessage().isEmpty()) {
+                    System.out.println(result.getMessage());
+                }
+            } else {
+                System.err.println("Ошибка: " + result.getMessage());
             }
         } else {
-            System.err.println("Неизвестная команда: " + commandName + ". Введите 'help' для списка команд.");
+            System.err.println("Неизвестная команда: " + commandName);
         }
     }
 
+    /**
+     * Устанавливает флаг работы приложения. Используется командой 'exit'.
+     * @param running Новое состояние флага.
+     */
     public void setRunning(boolean running) {
         this.running = running;
     }

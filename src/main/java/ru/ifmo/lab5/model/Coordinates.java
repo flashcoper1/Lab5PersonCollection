@@ -48,6 +48,10 @@ public class Coordinates {
         if (x == null) {
             throw new IllegalArgumentException("Координата X не может быть null.");
         }
+
+        if (x > 348) {
+            throw new IllegalArgumentException("Максимальное значение координаты X: 348.");
+        }
         this.x = x;
     }
 

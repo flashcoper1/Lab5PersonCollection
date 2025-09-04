@@ -1,31 +1,21 @@
 package ru.ifmo.lab5.commands;
-
-// Terminal и UserInputHandler больше не нужны в конструкторе, ScriptRunner их уже знает
 import ru.ifmo.lab5.managers.ScriptRunner;
+import ru.ifmo.lab5.util.CommandResult;
 
-/**
- * Команда для выполнения скрипта из файла.
- */
 public class ExecuteScriptCommand implements Command {
     private final ScriptRunner scriptRunner;
 
-    /**
-     * Конструктор.
-     * @param scriptRunner Исполнитель скриптов.
-     */
     public ExecuteScriptCommand(ScriptRunner scriptRunner) {
         this.scriptRunner = scriptRunner;
     }
 
     @Override
-    public void execute(String arguments) {
+    public CommandResult execute(String arguments) {
         if (arguments == null || arguments.trim().isEmpty()) {
-            System.err.println("Ошибка: Необходимо указать имя файла скрипта.");
-            return;
+            return CommandResult.error("Необходимо указать имя файла скрипта.");
         }
-        // ScriptRunner уже имеет доступ к mainTerminal и mainUserInputHandler,
-        // которые были переданы ему при создании в Main.java
         scriptRunner.executeScript(arguments.trim());
+        return CommandResult.success(); // Сообщения о выполнении выводятся самим ScriptRunner
     }
 
     @Override

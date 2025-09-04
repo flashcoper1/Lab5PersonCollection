@@ -31,7 +31,7 @@ public class Person implements Comparable<Person> {
     private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
 
     @XmlElement(required = true)
-    private Integer height; //Поле не может быть null, Значение поля должно быть больше 0
+    private long height; //Поле не может быть null, Значение поля должно быть больше 0
 
     @XmlElement
     private Color eyeColor; //Поле может быть null
@@ -61,7 +61,7 @@ public class Person implements Comparable<Person> {
      * @param nationality Национальность. Может быть null.
      * @param location Местоположение. Не может быть null.
      */
-    public Person(long id, String name, Coordinates coordinates, Integer height, Color eyeColor, Color hairColor, Country nationality, Location location) {
+    public Person(long id, String name, Coordinates coordinates, long height, Color eyeColor, Color hairColor, Country nationality, Location location) {
         // ID и creationDate устанавливаются в CollectionManager при добавлении или обновлении
         this.id = id;
         this.setName(name);
@@ -125,9 +125,9 @@ public class Person implements Comparable<Person> {
         return height;
     }
 
-    public void setHeight(Integer height) {
-        if (height == null || height <= 0) {
-            throw new IllegalArgumentException("Рост не может быть null и должен быть больше 0.");
+    public void setHeight(long height) {
+        if (height <= 0) {
+            throw new IllegalArgumentException("Рост должен быть больше 0.");
         }
         this.height = height;
     }
@@ -161,9 +161,6 @@ public class Person implements Comparable<Person> {
     }
 
     public void setLocation(Location location) {
-        if (location == null) {
-            throw new IllegalArgumentException("Местоположение не может быть null.");
-        }
         this.location = location;
     }
 

@@ -1,9 +1,8 @@
 package ru.ifmo.lab5.commands;
 
 import ru.ifmo.lab5.managers.CommandManager;
-
+import ru.ifmo.lab5.util.CommandResult;
 import java.util.Map;
-
 /**
  * Команда для вывода справки по доступным командам.
  */
@@ -19,14 +18,15 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public void execute(String arguments) {
-        System.out.println("Доступные команды:");
-        // Сортируем команды по имени для более удобного вывода
+    public CommandResult execute(String arguments) {
+        StringBuilder sb = new StringBuilder("Доступные команды:\n");
+        // Используем форматирование для выравнивания колонок
         commandManager.getCommands().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry ->
-                        System.out.println("  " + entry.getKey() + " - " + entry.getValue().getDescription())
+                        sb.append(String.format("  %-35s - %s\n", entry.getKey(), entry.getValue().getDescription()))
                 );
+        return CommandResult.success(sb.toString().trim());
     }
 
     @Override

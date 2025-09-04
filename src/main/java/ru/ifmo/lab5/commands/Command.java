@@ -1,18 +1,22 @@
 package ru.ifmo.lab5.commands;
 
+import ru.ifmo.lab5.util.CommandResult;
+
 /**
- * Интерфейс для всех команд.
+ * Интерфейс, который должны реализовывать все команды.
+ * Определяет основной метод для выполнения и метод для получения описания.
  */
 public interface Command {
     /**
-     * Выполняет команду.
-     * @param arguments Аргументы команды.
+     * Выполняет логику команды.
+     * @param arguments Аргументы, переданные команде в виде одной строки.
+     * @return Объект {@link CommandResult}, содержащий статус и сообщение о результате выполнения.
      */
-    void execute(String arguments);
+    CommandResult execute(String arguments);
 
     /**
-     * Возвращает описание команды.
-     * @return Описание команды.
+     * Возвращает описание команды для использования в команде 'help'.
+     * @return Строка с описанием команды.
      */
     String getDescription();
 }

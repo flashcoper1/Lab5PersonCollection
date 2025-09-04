@@ -19,9 +19,8 @@ public class CommandManager {
      * Конструктор.
      * @param collectionManager Менеджер коллекции.
      * @param xmlFileManager Менеджер файлов.
-     * @param consoleScanner Устаревший параметр, больше не используется напрямую здесь.
      */
-    public CommandManager(CollectionManager collectionManager, XmlFileManager xmlFileManager, Scanner consoleScanner /*старый параметр*/) {
+    public CommandManager(CollectionManager collectionManager, XmlFileManager xmlFileManager) {
         this.collectionManager = collectionManager;
         this.xmlFileManager = xmlFileManager;
         // UserInputHandler и LineReader/Terminal будут передаваться командам при их создании/вызове

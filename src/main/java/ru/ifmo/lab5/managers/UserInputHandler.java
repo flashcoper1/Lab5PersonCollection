@@ -37,7 +37,7 @@ public class UserInputHandler {
         System.out.println("Ввод данных для нового человека:");
         String name = requestString("Введите имя (не может быть пустым):", false);
         Coordinates coordinates = requestCoordinatesData();
-        Integer height = requestInteger("Введите рост (целое число > 0):", false, 1, null);
+        long height = requestPrimitiveLong("Введите рост (целое число > 0):", false, 1L, null);
 
         Color eyeColor = requestEnum(Color.class, "цвет глаз", true);
         Color hairColor = requestEnum(Color.class, "цвет волос", true);
@@ -50,7 +50,7 @@ public class UserInputHandler {
 
     private Coordinates requestCoordinatesData() {
         System.out.println("Ввод координат:");
-        Double x = requestDouble("  Введите координату X (дробное число, не null):", false, null, null);
+        Double x = requestDouble("  Введите координату X (дробное число, не null, max: 348):", false, null, 348.0);
         int y = requestInt("  Введите координату Y (целое число):", false, null, null);
         return new Coordinates(x, y);
     }

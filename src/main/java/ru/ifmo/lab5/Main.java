@@ -7,8 +7,10 @@ import org.jline.terminal.TerminalBuilder;
 import ru.ifmo.lab5.commands.ExecuteScriptCommand;
 import ru.ifmo.lab5.managers.*;
 import ru.ifmo.lab5.util.CommandCompleter;
-
 import java.io.IOException;
+import java.util.TreeSet;
+import ru.ifmo.lab5.model.Person;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Главный класс приложения. Инициализирует все компоненты и запускает консольное приложение.
@@ -34,7 +36,6 @@ public class Main {
         }
 
         Terminal terminal = null;
-        // ConsoleApplication app; // Инициализатор 'null' избыточен, убрали
 
         try {
             // 1. Создаем Terminal
@@ -43,10 +44,22 @@ public class Main {
             // 2. Создаем базовые менеджеры
             CollectionManager collectionManager = new CollectionManager();
             XmlFileManager xmlFileManager = new XmlFileManager(filePath);
-            collectionManager.setCollection(xmlFileManager.load());
+
+            try {
+                TreeSet<Person> loadedCollection = xmlFileManager.load();
+                collectionManager.setCollection(loadedCollection);
+                System.out.println("Коллекция успешно загружена. Загружено элементов: " + loadedCollection.size());
+            } catch (FileNotFoundException e) { // Это не ошибка, а первое создание
+                System.out.println("Файл коллекции не найден. Будет создана новая пустая коллекция.");
+            } catch (JAXBException | IOException | SecurityException e) {
+                System.err.println("Критическая ошибка при загрузке коллекции из файла: " + e.getMessage());
+                System.err.println("Программа будет завершена, так как начальное состояние не может быть загружено.");
+                return; // Выход из программы при невозможности загрузить файл
+            }
+
 
             // 3. CommandManager
-            CommandManager commandManager = new CommandManager(collectionManager, xmlFileManager, null);
+            CommandManager commandManager = new CommandManager(collectionManager, xmlFileManager);
 
             // 4. Создаем наш кастомный CommandCompleter СРАЗУ после CommandManager
             CommandCompleter commandCompleter = new CommandCompleter(commandManager);
