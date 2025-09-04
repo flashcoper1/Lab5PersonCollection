@@ -42,7 +42,9 @@ public class Main {
             } catch (FileNotFoundException e) {
                 System.out.println("Файл коллекции не найден. Будет создана новая пустая коллекция.");
             } catch (JAXBException | IOException | SecurityException e) {
-                System.err.println("Критическая ошибка при загрузке коллекции из файла: " + e.getMessage());
+                System.err.println("Критическая ошибка при загрузке коллекции из файла. Проверьте содержимое файла и права доступа.");
+                // ИСПРАВЛЕНИЕ: Выводим полный стектрейс для диагностики
+                e.printStackTrace();
                 System.err.println("Программа будет завершена.");
                 return;
             }
@@ -74,8 +76,10 @@ public class Main {
 
         } catch (IOException e) {
             System.err.println("Критическая ошибка терминала: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
             System.err.println("Непредвиденная критическая ошибка при запуске приложения: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
