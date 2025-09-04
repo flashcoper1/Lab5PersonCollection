@@ -13,7 +13,6 @@ import java.util.TreeSet;
 
 /**
  * Управляет загрузкой и сохранением коллекции в XML файл.
- * Этот класс не взаимодействует с консолью, а сообщает об ошибках через исключения.
  */
 public class XmlFileManager {
 
@@ -24,20 +23,9 @@ public class XmlFileManager {
     private static class PersonWrapper {
         @XmlElement(name = "person")
         private TreeSet<Person> persons = new TreeSet<>();
-
-        public PersonWrapper() {
-            // можно стереть нахер
-            // но не повредит))
-        }
-
-        public PersonWrapper(TreeSet<Person> persons) {
-            this.persons = persons;
-        }
-
-        public TreeSet<Person> getPersons() {
-            return persons;
-        }
-
+        public PersonWrapper() {}
+        public PersonWrapper(TreeSet<Person> persons) { this.persons = persons; }
+        public TreeSet<Person> getPersons() { return persons; }
     }
 
     /**
@@ -50,20 +38,23 @@ public class XmlFileManager {
 
     /**
      * Загружает коллекцию из XML файла.
+     * Корректно обрабатывает пустой файл.
      * @return Загруженная коллекция.
      * @throws IOException если произошла ошибка ввода-вывода.
      * @throws JAXBException если файл имеет неверный XML формат.
-     * @throws FileNotFoundException если файл не найден.
      * @throws SecurityException если нет прав на чтение файла.
      */
     public TreeSet<Person> load() throws IOException, JAXBException, SecurityException {
         File file = new File(filePath);
         if (!file.exists()) {
-            // Если файла нет, это не ошибка, а штатная ситуация. Просто возвращаем пустую коллекцию.
-            // Сообщение об этом выведет вызывающий код (в Main).
+            // Файла нет - возвращаем пустую коллекцию.
             return new TreeSet<>();
         }
-        // Проверки на isFile и canRead выбросят SecurityException, если что-то не так
+
+        if (file.length() == 0) {
+            // Файл существует, но он пустой. Это тоже норм ситуация.
+            return new TreeSet<>();
+        }
 
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
             JAXBContext context = JAXBContext.newInstance(PersonWrapper.class, Person.class, Coordinates.class, Location.class, Color.class, Country.class);
