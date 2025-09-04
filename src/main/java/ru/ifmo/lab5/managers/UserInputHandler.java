@@ -76,8 +76,6 @@ public class UserInputHandler {
         return new Location(x, y, z, name);
     }
 
-    // --- ОБЩИЕ МЕТОДЫ ЗАПРОСА ДАННЫХ ---
-
     public String requestString(String prompt, boolean nullable, Integer maxLength) {
         while (true) {
             try {

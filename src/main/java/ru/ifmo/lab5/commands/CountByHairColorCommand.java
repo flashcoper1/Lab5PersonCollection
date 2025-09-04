@@ -4,6 +4,9 @@ import ru.ifmo.lab5.managers.UserInputHandler;
 import ru.ifmo.lab5.model.Color;
 import ru.ifmo.lab5.util.CommandResult;
 
+/**
+ * Команда для нахождения количества людей с определенным цветом волос.
+ */
 public class CountByHairColorCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;

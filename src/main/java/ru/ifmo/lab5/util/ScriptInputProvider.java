@@ -26,7 +26,6 @@ public class ScriptInputProvider implements InputProvider {
             System.out.println(line);
             return line;
         } else {
-            // Сигнализируем о конце файла, бросая исключение, как это делает JLine
             throw new EndOfFileException();
         }
     }

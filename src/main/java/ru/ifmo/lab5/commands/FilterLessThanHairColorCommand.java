@@ -6,6 +6,10 @@ import ru.ifmo.lab5.model.Person;
 import ru.ifmo.lab5.util.CommandResult;
 import java.util.TreeSet;
 
+/**
+ * Команда для демонстрации персон с меньшим чем
+ *                                  заданный цвет волос.
+ */
 public class FilterLessThanHairColorCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;

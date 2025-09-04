@@ -1,6 +1,5 @@
 package ru.ifmo.lab5.managers;
 
-import org.jline.reader.EndOfFileException;
 import ru.ifmo.lab5.commands.Command;
 import ru.ifmo.lab5.util.CommandResult;
 import ru.ifmo.lab5.util.CommandStatus;
@@ -87,7 +86,7 @@ public class ScriptRunner {
         } catch (FileNotFoundException e) {
             System.err.println("Файл скрипта не найден: " + absolutePath);
         } catch (java.util.NoSuchElementException e) {
-            // Это штатное завершение работы Scanner'а, когда строки закончились
+            // Конец файла достигнут - нормальное завершение
         } finally {
             runningScripts.remove(absolutePath);
             userInputHandler.popInputProvider();

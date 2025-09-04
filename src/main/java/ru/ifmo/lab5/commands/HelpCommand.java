@@ -3,6 +3,7 @@ package ru.ifmo.lab5.commands;
 import ru.ifmo.lab5.managers.CommandManager;
 import ru.ifmo.lab5.util.CommandResult;
 import java.util.Map;
+
 /**
  * Команда для вывода справки по доступным командам.
  */
@@ -20,7 +21,6 @@ public class HelpCommand implements Command {
     @Override
     public CommandResult execute(String arguments) {
         StringBuilder sb = new StringBuilder("Доступные команды:\n");
-        // Используем форматирование для выравнивания колонок
         commandManager.getCommands().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry ->

@@ -40,7 +40,6 @@ public class UpdateCommand implements Command {
             if (collectionManager.update(id, updatedPersonData)) {
                 return CommandResult.success("Человек с ID " + id + " успешно обновлен.");
             } else {
-                // Эта ветка маловероятна из-за предварительной проверки, но оставим для надежности
                 return CommandResult.error("Не удалось обновить человека с ID " + id + ".");
             }
         } catch (NumberFormatException e) {

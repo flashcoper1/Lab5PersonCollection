@@ -43,7 +43,6 @@ public class Main {
                 System.out.println("Файл коллекции не найден. Будет создана новая пустая коллекция.");
             } catch (JAXBException | IOException | SecurityException e) {
                 System.err.println("Критическая ошибка при загрузке коллекции из файла. Проверьте содержимое файла и права доступа.");
-                // ИСПРАВЛЕНИЕ: Выводим полный стектрейс для диагностики
                 e.printStackTrace();
                 System.err.println("Программа будет завершена.");
                 return;

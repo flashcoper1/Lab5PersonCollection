@@ -1,10 +1,8 @@
 package ru.ifmo.lab5.managers;
 
 import ru.ifmo.lab5.commands.Command;
-// import org.jline.terminal.Terminal; // Не нужен здесь напрямую
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner; // Был для старого ScriptRunner, теперь не нужен
 
 /**
  * Управляет регистрацией и вызовом команд.
@@ -24,8 +22,6 @@ public class CommandManager {
     public CommandManager(CollectionManager collectionManager, XmlFileManager xmlFileManager) {
         this.collectionManager = collectionManager;
         this.xmlFileManager = xmlFileManager;
-        // UserInputHandler и LineReader/Terminal будут передаваться командам при их создании/вызове
-        // или через ConsoleApplication.
     }
 
     /**
@@ -73,7 +69,6 @@ public class CommandManager {
      */
     public ScriptRunner getScriptRunner() {
         if (this.scriptRunner == null) {
-            // Это состояние не должно возникать при правильном порядке инициализации в Main
             throw new IllegalStateException("ScriptRunner не был инициализирован в CommandManager.");
         }
         return scriptRunner;

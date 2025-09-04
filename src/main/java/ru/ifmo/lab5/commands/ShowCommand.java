@@ -29,7 +29,7 @@ public class ShowCommand implements Command {
             sb.append(person.toString()).append("\n");
             sb.append("---\n");
         }
-        // Убираем последний разделитель "---"
+
         if (sb.length() > 4) {
             sb.setLength(sb.length() - 5);
         }

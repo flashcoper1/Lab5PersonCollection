@@ -4,6 +4,9 @@ import ru.ifmo.lab5.managers.UserInputHandler;
 import ru.ifmo.lab5.model.Person;
 import ru.ifmo.lab5.util.CommandResult;
 
+/**
+ * Команда для добавления нового человека если он меньше минимального.
+ */
 public class AddIfMinCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;

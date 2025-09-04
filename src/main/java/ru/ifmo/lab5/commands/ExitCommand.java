@@ -2,6 +2,9 @@ package ru.ifmo.lab5.commands;
 import ru.ifmo.lab5.managers.ConsoleApplication;
 import ru.ifmo.lab5.util.CommandResult;
 
+/**
+ * Команда для выхода из приложения.
+ */
 public class ExitCommand implements Command {
     private final ConsoleApplication app;
 

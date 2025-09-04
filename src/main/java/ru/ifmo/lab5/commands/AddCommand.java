@@ -32,7 +32,6 @@ public class AddCommand implements Command {
         } catch (IllegalArgumentException e) {
             return CommandResult.error("Ошибка при добавлении: " + e.getMessage());
         } catch (Exception e) {
-            // Ловим UserInterruptException и EndOfFileException, которые могут быть брошены из requestPersonData
             return CommandResult.error("Ввод данных был прерван. Команда не выполнена.");
         }
     }

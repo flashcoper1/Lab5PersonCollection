@@ -2,6 +2,9 @@ package ru.ifmo.lab5.commands;
 import ru.ifmo.lab5.managers.CollectionManager;
 import ru.ifmo.lab5.util.CommandResult;
 
+/**
+ * Команда для нахождения среднего роста людей в коллекции.
+ */
 public class AverageOfHeightCommand implements Command {
     private final CollectionManager collectionManager;
 
