@@ -6,17 +6,20 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAccessType;
 
 /**
- * Класс, представляющий местоположение.
+ * Класс, представляющий местоположение с 3D-координатами и названием.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Location {
     @XmlElement(required = true)
     private Float x; //Поле не может быть null
-    @XmlElement(required = true)
-    private Double y; //Поле не может быть null
+
     @XmlElement
-    private long z;
+    private double y;
+
+    @XmlElement(required = true)
+    private Double z; //Поле не может быть null
+
     @XmlElement
     private String name; //Длина строки не должна быть больше 400, Поле может быть null
 
@@ -28,86 +31,30 @@ public class Location {
     /**
      * Создает новый объект Location.
      * @param x Координата X. Не может быть null.
-     * @param y Координата Y. Не может быть null.
-     * @param z Координата Z.
-     * @param name Название местоположения. Может быть null, длина не более 400 символов.
+     * @param y Координата Y.
+     * @param z Координата Z. Не может быть null.
+     * @param name Название местоположения.
      */
-    public Location(Float x, Double y, long z, String name) {
+    public Location(Float x, double y, Double z, String name) {
         this.setX(x);
-        this.setY(y);
-        this.z = z;
+        this.y = y;
+        this.setZ(z);
         this.setName(name);
     }
 
-    /**
-     * Возвращает координату X.
-     * @return Координата X.
-     */
-    public Float getX() {
-        return x;
-    }
-
-    /**
-     * Устанавливает координату X.
-     * @param x Координата X. Не может быть null.
-     * @throws IllegalArgumentException если x равен null.
-     */
+    public Float getX() { return x; }
     public void setX(Float x) {
-        if (x == null) {
-            throw new IllegalArgumentException("Координата X местоположения не может быть null.");
-        }
+        if (x == null) throw new IllegalArgumentException("Координата X местоположения не может быть null.");
         this.x = x;
     }
-
-    /**
-     * Возвращает координату Y.
-     * @return Координата Y.
-     */
-    public Double getY() {
-        return y;
-    }
-
-    /**
-     * Устанавливает координату Y.
-     * @param y Координата Y. Не может быть null.
-     * @throws IllegalArgumentException если y равен null.
-     */
-    public void setY(Double y) {
-        if (y == null) {
-            throw new IllegalArgumentException("Координата Y местоположения не может быть null.");
-        }
-        this.y = y;
-    }
-
-    /**
-     * Возвращает координату Z.
-     * @return Координата Z.
-     */
-    public long getZ() {
-        return z;
-    }
-
-    /**
-     * Устанавливает координату Z.
-     * @param z Координата Z.
-     */
-    public void setZ(long z) {
+    public double getY() { return y; }
+    public void setY(double y) { this.y = y; }
+    public Double getZ() { return z; }
+    public void setZ(Double z) {
+        if (z == null) throw new IllegalArgumentException("Координата Z местоположения не может быть null.");
         this.z = z;
     }
-
-    /**
-     * Возвращает название местоположения.
-     * @return Название местоположения.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Устанавливает название местоположения.
-     * @param name Название местоположения. Длина не более 400 символов.
-     * @throws IllegalArgumentException если длина имени превышает 400 символов.
-     */
+    public String getName() { return name; }
     public void setName(String name) {
         if (name != null && name.length() > 400) {
             throw new IllegalArgumentException("Длина имени местоположения не должна превышать 400 символов.");

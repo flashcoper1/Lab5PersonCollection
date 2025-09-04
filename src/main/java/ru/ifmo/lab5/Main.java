@@ -37,19 +37,14 @@ public class Main {
         String filePath = System.getenv("PERSON_COLLECTION_FILE");
         if (filePath == null || filePath.trim().isEmpty()) {
             System.err.println("Ошибка: Переменная окружения PERSON_COLLECTION_FILE не установлена или пуста.");
-            System.err.println("Пожалуйста, установите ее и укажите путь к XML файлу коллекции.");
-            System.err.println("Пример (Linux/macOS): export PERSON_COLLECTION_FILE=\"/path/to/your/file.xml\"");
-            System.err.println("Пример (Windows CMD): set PERSON_COLLECTION_FILE=\"C:\\path\\to\\your\\file.xml\"");
-            System.err.println("Пример (Windows PowerShell): $env:PERSON_COLLECTION_FILE=\"C:\\path\\to\\your\\file.xml\"");
             return;
         }
 
         try (Terminal terminal = TerminalBuilder.builder().system(true).build()) {
-            // 1. Создание базовых менеджеров
+
             CollectionManager collectionManager = new CollectionManager();
             XmlFileManager xmlFileManager = new XmlFileManager(filePath);
 
-            // 2. Загрузка коллекции из файла
             try {
                 TreeSet<Person> loadedCollection = xmlFileManager.load();
                 collectionManager.setCollection(loadedCollection);
@@ -59,10 +54,9 @@ public class Main {
             } catch (JAXBException | IOException | SecurityException e) {
                 System.err.println("Критическая ошибка при загрузке коллекции из файла: " + e.getMessage());
                 System.err.println("Программа будет завершена, так как начальное состояние не может быть загружено.");
-                return; // Выход из программы при критической ошибке
+                return;
             }
 
-            // 3. Создание остальных менеджеров и компонентов
             CommandManager commandManager = new CommandManager(collectionManager, xmlFileManager);
             CommandCompleter commandCompleter = new CommandCompleter(commandManager);
 
@@ -77,7 +71,6 @@ public class Main {
             ScriptRunner scriptRunner = new ScriptRunner(commandManager);
             commandManager.setScriptRunner(scriptRunner);
 
-            // 4. Создание и запуск приложения
             ConsoleApplication app = new ConsoleApplication(
                     commandManager,
                     userInputHandler,
@@ -88,7 +81,7 @@ public class Main {
             app.run();
 
         } catch (IOException e) {
-            System.err.println("Критическая ошибка при инициализации или закрытии JLine терминала: " + e.getMessage());
+            System.err.println("Критическая ошибка терминала: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Непредвиденная критическая ошибка при запуске приложения: " + e.getMessage());
         }

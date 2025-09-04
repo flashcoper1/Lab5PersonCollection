@@ -58,15 +58,15 @@ public class UserInputHandler {
     private Location requestLocationData() {
         System.out.println("Ввод местоположения:");
         Float x = requestFloat("  Введите координату X местоположения (дробное число, не null):", false, null, null);
-        Double y = requestDouble("  Введите координату Y местоположения (дробное число, не null):", false, null, null);
-        long z = requestPrimitiveLong("  Введите координату Z местоположения (целое число):", false, null, null);
+        double y = requestDouble("  Введите координату Y местоположения (дробное число):", false, null, null);
+        Double z = requestDouble("  Введите координату Z местоположения (дробное число, не null):", false, null, null);
         String name = requestString("  Введите название местоположения (до 400 символов, можно оставить пустым):", true, 400);
         return new Location(x, y, z, name);
     }
 
     public String requestString(String prompt, boolean nullable, Integer maxLength) {
         while (true) {
-            String input = null;
+            String input;
             try {
                 input = readLineWithJLine(prompt + " ");
                 if (input == null && !nullable) { // Ctrl+D на обязательном поле
@@ -109,11 +109,13 @@ public class UserInputHandler {
             String inputStr = null;
             try {
                 inputStr = readLineWithJLine(prompt + " ");
-                if (inputStr == null && !nullable) {
-                    System.err.println("Ошибка: Ввод обязательного поля был прерван (Ctrl+D). Повторите ввод.");
-                    continue;
-                } else if (inputStr == null && nullable) {
-                    return null;
+                if (inputStr == null) {
+                    if (nullable) {
+                        return null;
+                    } else {
+                        System.err.println("Ошибка: Ввод обязательного поля был прерван. Повторите ввод.");
+                        continue;
+                    }
                 }
                 inputStr = inputStr.trim();
             } catch (UserInterruptException e) {

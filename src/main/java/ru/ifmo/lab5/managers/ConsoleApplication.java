@@ -1,7 +1,6 @@
 package ru.ifmo.lab5.managers;
 
 import org.jline.reader.*;
-import org.jline.terminal.Terminal;
 import ru.ifmo.lab5.commands.*;
 import ru.ifmo.lab5.util.CommandResult;
 import ru.ifmo.lab5.util.CommandStatus;

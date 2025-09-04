@@ -6,24 +6,34 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAccessType;
 
 /**
- * Класс, представляющий координаты.
+ * Класс, представляющий 2D координаты.
+ * Используется в классе {@link Person} для хранения местоположения.
+ * Содержит валидацию для полей в соответствии с требованиями задания.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Coordinates {
+    /**
+     * Координата X. Поле не может быть null, максимальное значение: 348.
+     */
     @XmlElement(required = true)
-    private Double x; //Поле не может быть null
+    private Double x;
+
+    /**
+     * Координата Y.
+     */
     @XmlElement
     private float y;
 
     /**
-     * Конструктор по умолчанию для JAXB.
+     * Конструктор по умолчанию.
+     * Необходим для корректной работы JAXB при десериализации XML.
      */
     public Coordinates() {}
 
     /**
-     * Создает новый объект Coordinates.
-     * @param x Координата X. Не может быть null.
+     * Создает новый объект Coordinates с заданными значениями.
+     * @param x Координата X.
      * @param y Координата Y.
      */
     public Coordinates(Double x, float y) {
@@ -41,14 +51,14 @@ public class Coordinates {
 
     /**
      * Устанавливает координату X.
-     * @param x Координата X. Не может быть null.
-     * @throws IllegalArgumentException если x равен null.
+     * Проверяет, что значение не равно null и не превышает максимальное допустимое значение (348).
+     * @param x Координата X для установки.
+     * @throws IllegalArgumentException если x равен null или больше 348.
      */
     public void setX(Double x) {
         if (x == null) {
             throw new IllegalArgumentException("Координата X не может быть null.");
         }
-
         if (x > 348) {
             throw new IllegalArgumentException("Максимальное значение координаты X: 348.");
         }
@@ -65,12 +75,16 @@ public class Coordinates {
 
     /**
      * Устанавливает координату Y.
-     * @param y Координата Y.
+     * @param y Координата Y для установки.
      */
     public void setY(float y) {
         this.y = y;
     }
 
+    /**
+     * Возвращает строковое представление объекта Coordinates.
+     * @return Строка в формате "Coordinates{x=..., y=...}".
+     */
     @Override
     public String toString() {
         return "Coordinates{" +

@@ -191,16 +191,18 @@ public class Person implements Comparable<Person> {
 
     @Override
     public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+
         return "Person {" +
                 "\n  id=" + id +
                 ",\n  name='" + name + '\'' +
                 ",\n  coordinates=" + coordinates +
-                ",\n  creationDate=" + (creationDate != null ? creationDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss z")) : "N/A") +
+                ",\n  creationDate=" + (creationDate != null ? creationDate.format(formatter) : "N/A") +
                 ",\n  height=" + height +
                 ",\n  eyeColor=" + (eyeColor == null ? "N/A" : eyeColor.getRussianName()) +
                 ",\n  hairColor=" + (hairColor == null ? "N/A" : hairColor.getRussianName()) +
                 ",\n  nationality=" + (nationality == null ? "N/A" : nationality.getRussianName()) +
-                ",\n  location=" + location +
+                ",\n  location=" + (location != null ? location.toString() : "N/A") +
                 "\n}";
     }
 }

@@ -5,6 +5,8 @@ import ru.ifmo.lab5.model.Person;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.Optional;
 
@@ -37,11 +39,7 @@ public class CollectionManager {
      * @param loadedCollection Новая коллекция.
      */
     public void setCollection(TreeSet<Person> loadedCollection) {
-        if (loadedCollection == null) {
-            this.collection = new TreeSet<>();
-        } else {
-            this.collection = loadedCollection;
-        }
+        this.collection = Objects.requireNonNullElse(loadedCollection, new TreeSet<>());
         updateNextId();
     }
 
@@ -153,6 +151,8 @@ public class CollectionManager {
      * @return Строка с информацией.
      */
     public String getInfo() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
+
         return "Тип коллекции: " + collection.getClass().getName() +
                 "\nДата инициализации: " + initializationTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss z")) +
                 "\nКоличество элементов: " + collection.size();
