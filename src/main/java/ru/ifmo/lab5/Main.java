@@ -8,6 +8,7 @@ import org.jline.terminal.TerminalBuilder;
 import ru.ifmo.lab5.managers.*;
 import ru.ifmo.lab5.model.Person;
 import ru.ifmo.lab5.util.CommandCompleter;
+import ru.ifmo.lab5.util.ConsoleInputProvider;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,28 +16,17 @@ import java.util.TreeSet;
 
 /**
  * Главный класс приложения.
- * Инициализирует все компоненты: менеджеры, JLine для консольного ввода,
- * регистрирует команды и запускает основной цикл обработки команд.
+ * Инициализирует все компоненты и запускает консольное приложение.
  */
 public class Main {
     /**
      * Точка входа в программу.
-     * <p>
-     * Выполняет следующие шаги:
-     * 1. Проверяет наличие переменной окружения с путем к файлу коллекции.
-     * 2. Инициализирует JLine Terminal.
-     * 3. Создает {@link XmlFileManager} и {@link CollectionManager}.
-     * 4. Загружает коллекцию из файла, обрабатывая возможные ошибки.
-     * 5. Создает {@link CommandManager}, {@link UserInputHandler}, {@link ScriptRunner}.
-     * 6. Создает {@link ConsoleApplication} и регистрирует в нем все команды.
-     * 7. Запускает главный цикл приложения.
-     *
      * @param args аргументы командной строки (не используются).
      */
     public static void main(String[] args) {
         String filePath = System.getenv("PERSON_COLLECTION_FILE");
         if (filePath == null || filePath.trim().isEmpty()) {
-            System.err.println("Ошибка: Переменная окружения PERSON_COLLECTION_FILE не установлена или пуста.");
+            System.err.println("Ошибка: Переменная окружения PERSON_COLLECTION_FILE не установлена.");
             return;
         }
 
@@ -53,7 +43,7 @@ public class Main {
                 System.out.println("Файл коллекции не найден. Будет создана новая пустая коллекция.");
             } catch (JAXBException | IOException | SecurityException e) {
                 System.err.println("Критическая ошибка при загрузке коллекции из файла: " + e.getMessage());
-                System.err.println("Программа будет завершена, так как начальное состояние не может быть загружено.");
+                System.err.println("Программа будет завершена.");
                 return;
             }
 
@@ -67,8 +57,10 @@ public class Main {
                     .variable(LineReader.HISTORY_FILE, ".person_app_history")
                     .build();
 
-            UserInputHandler userInputHandler = new UserInputHandler(lineReader);
-            ScriptRunner scriptRunner = new ScriptRunner(commandManager);
+            UserInputHandler userInputHandler = new UserInputHandler();
+            userInputHandler.pushInputProvider(new ConsoleInputProvider(lineReader));
+
+            ScriptRunner scriptRunner = new ScriptRunner(commandManager, userInputHandler);
             commandManager.setScriptRunner(scriptRunner);
 
             ConsoleApplication app = new ConsoleApplication(
