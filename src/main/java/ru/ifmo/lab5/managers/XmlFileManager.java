@@ -45,7 +45,7 @@ public class XmlFileManager {
      * @param filePath Путь к файлу XML.
      */
     public XmlFileManager(String filePath) {
-        this.filePath = filePath;
+        this.filePath = filePath.replace("\"", "");
     }
 
     /**
