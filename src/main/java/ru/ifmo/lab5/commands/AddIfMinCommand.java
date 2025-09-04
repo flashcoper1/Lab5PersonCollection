@@ -11,6 +11,11 @@ public class AddIfMinCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;
 
+    /**
+     * Конструктор команды.
+     * @param collectionManager Менеджер коллекции для проверки и добавления.
+     * @param userInputHandler Обработчик для запроса данных нового элемента.
+     */
     public AddIfMinCommand(CollectionManager collectionManager, UserInputHandler userInputHandler) {
         this.collectionManager = collectionManager;
         this.userInputHandler = userInputHandler;

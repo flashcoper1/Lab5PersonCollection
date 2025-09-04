@@ -7,13 +7,18 @@ import ru.ifmo.lab5.util.CommandResult;
 import java.util.TreeSet;
 
 /**
- * Команда для демонстрации персон с меньшим чем
- *                                  заданный цвет волос.
+ * Команда для вывода элементов, значение поля hairColor которых меньше заданного.
+ * Сравнение происходит по порядку объявления констант в {@link Color}.
  */
 public class FilterLessThanHairColorCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;
 
+    /**
+     * Конструктор команды.
+     * @param collectionManager Менеджер коллекции для выполнения фильтрации.
+     * @param userInputHandler Обработчик для запроса цвета, если он не указан в аргументах.
+     */
     public FilterLessThanHairColorCommand(CollectionManager collectionManager, UserInputHandler userInputHandler) {
         this.collectionManager = collectionManager;
         this.userInputHandler = userInputHandler;

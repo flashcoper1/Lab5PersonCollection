@@ -5,7 +5,8 @@ import ru.ifmo.lab5.util.CommandResult;
 import java.util.Map;
 
 /**
- * Команда для вывода справки по доступным командам.
+ * Команда для вывода справки по всем доступным командам.
+ * Получает информацию из {@link CommandManager}.
  */
 public class HelpCommand implements Command {
     private final CommandManager commandManager;

@@ -8,6 +8,10 @@ import ru.ifmo.lab5.util.CommandResult;
 public class ExitCommand implements Command {
     private final ConsoleApplication app;
 
+    /**
+     * Конструктор команды.
+     * @param app Ссылка на главный класс приложения для управления его жизненным циклом.
+     */
     public ExitCommand(ConsoleApplication app) {
         this.app = app;
     }

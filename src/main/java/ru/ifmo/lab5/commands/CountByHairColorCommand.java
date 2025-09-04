@@ -11,6 +11,11 @@ public class CountByHairColorCommand implements Command {
     private final CollectionManager collectionManager;
     private final UserInputHandler userInputHandler;
 
+    /**
+     * Конструктор команды.
+     * @param collectionManager Менеджер коллекции для выполнения подсчета.
+     * @param userInputHandler Обработчик для запроса цвета, если он не указан в аргументах.
+     */
     public CountByHairColorCommand(CollectionManager collectionManager, UserInputHandler userInputHandler) {
         this.collectionManager = collectionManager;
         this.userInputHandler = userInputHandler;

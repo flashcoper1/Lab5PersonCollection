@@ -3,14 +3,20 @@ import ru.ifmo.lab5.managers.ScriptRunner;
 import ru.ifmo.lab5.util.CommandResult;
 
 /**
- * Команда для выполнения скриптов.
+ * Команда для исполнения скрипта из указанного файла.
+ * Делегирует выполнение {@link ScriptRunner}.
  */
 public class ExecuteScriptCommand implements Command {
     private final ScriptRunner scriptRunner;
 
+    /**
+     * Конструктор команды.
+     * @param scriptRunner Экземпляр исполнителя скриптов.
+     */
     public ExecuteScriptCommand(ScriptRunner scriptRunner) {
         this.scriptRunner = scriptRunner;
     }
+
 
     @Override
     public CommandResult execute(String arguments) {

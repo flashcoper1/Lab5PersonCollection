@@ -8,6 +8,10 @@ import ru.ifmo.lab5.util.CommandResult;
 public class ClearCommand implements Command {
     private final CollectionManager collectionManager;
 
+    /**
+     * Конструктор команды.
+     * @param collectionManager Менеджер коллекции, которую необходимо очистить.
+     */
     public ClearCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
