@@ -51,7 +51,7 @@ public class UserInputHandler {
     private Coordinates requestCoordinatesData() {
         System.out.println("Ввод координат:");
         Double x = requestDouble("  Введите координату X (дробное число, не null, max: 348):", false, null, 348.0);
-        int y = requestInt("  Введите координату Y (целое число):", false, null, null);
+        float y = requestFloat("  Введите координату Y (дробное число):", false, null, null);
         return new Coordinates(x, y);
     }
 

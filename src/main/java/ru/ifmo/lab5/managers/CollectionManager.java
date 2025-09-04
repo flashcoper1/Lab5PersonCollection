@@ -2,6 +2,7 @@ package ru.ifmo.lab5.managers;
 
 import ru.ifmo.lab5.model.Person;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TreeSet;
@@ -59,7 +60,7 @@ public class CollectionManager {
      */
     public void add(Person person) {
         person.setId(nextId++);
-        person.setCreationDate(ZonedDateTime.now());
+        person.setCreationDate(LocalDateTime.now());
         collection.add(person);
     }
 
@@ -102,7 +103,7 @@ public class CollectionManager {
         Optional<Person> personOptional = collection.stream().filter(p -> p.getId() == id).findFirst();
         if (personOptional.isPresent()) {
             Person personToUpdate = personOptional.get();
-            ZonedDateTime originalCreationDate = personToUpdate.getCreationDate();
+            LocalDateTime originalCreationDate = personToUpdate.getCreationDate();
 
             collection.remove(personToUpdate);
 
@@ -166,7 +167,7 @@ public class CollectionManager {
             return 0;
         }
         return collection.stream()
-                .mapToInt(Person::getHeight)
+                .mapToLong(Person::getHeight)
                 .average()
                 .orElse(0.0);
     }

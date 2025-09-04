@@ -14,7 +14,7 @@ public class Coordinates {
     @XmlElement(required = true)
     private Double x; //Поле не может быть null
     @XmlElement
-    private int y;
+    private float y;
 
     /**
      * Конструктор по умолчанию для JAXB.
@@ -26,7 +26,7 @@ public class Coordinates {
      * @param x Координата X. Не может быть null.
      * @param y Координата Y.
      */
-    public Coordinates(Double x, int y) {
+    public Coordinates(Double x, float y) {
         this.setX(x);
         this.y = y;
     }
@@ -59,7 +59,7 @@ public class Coordinates {
      * Возвращает координату Y.
      * @return Координата Y.
      */
-    public int getY() {
+    public float getY() {
         return y;
     }
 
@@ -67,7 +67,7 @@ public class Coordinates {
      * Устанавливает координату Y.
      * @param y Координата Y.
      */
-    public void setY(int y) {
+    public void setY(float y) {
         this.y = y;
     }
 

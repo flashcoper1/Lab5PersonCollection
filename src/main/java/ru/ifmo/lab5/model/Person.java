@@ -5,14 +5,15 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import ru.ifmo.lab5.util.ZonedDateTimeAdapter;
+import ru.ifmo.lab5.util.LocalDateTimeAdapter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
- * Класс, представляющий человека. Хранится в коллекции.
+ * Основной класс, объекты которого хранятся в коллекции.
+ * Реализует интерфейс {@link Comparable} для обеспечения естественного порядка сортировки.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -27,8 +28,8 @@ public class Person implements Comparable<Person> {
     private Coordinates coordinates; //Поле не может быть null
 
     @XmlElement(required = true)
-    @XmlJavaTypeAdapter(ZonedDateTimeAdapter.class)
-    private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
+    private java.time.LocalDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
 
     @XmlElement(required = true)
     private long height; //Поле не может быть null, Значение поля должно быть больше 0
@@ -109,11 +110,11 @@ public class Person implements Comparable<Person> {
         this.coordinates = coordinates;
     }
 
-    public ZonedDateTime getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(ZonedDateTime creationDate) {
+    public void setCreationDate(LocalDateTime creationDate) {
         if (creationDate == null) {
             throw new IllegalArgumentException("Дата создания не может быть null.");
         }
@@ -121,7 +122,7 @@ public class Person implements Comparable<Person> {
     }
 
 
-    public Integer getHeight() {
+    public long getHeight() {
         return height;
     }
 
@@ -164,9 +165,14 @@ public class Person implements Comparable<Person> {
         this.location = location;
     }
 
+    /**
+     * Сравнивает этот объект Person с другим по ID.
+     * @param other Другой объект Person для сравнения.
+     * @return отрицательное число, ноль или положительное число, если ID этого объекта
+     *         соответственно меньше, равно или больше ID другого объекта.
+     */
     @Override
     public int compareTo(Person other) {
-        // Сортировка по умолчанию по ID
         return Long.compare(this.id, other.id);
     }
 

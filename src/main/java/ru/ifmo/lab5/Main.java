@@ -1,26 +1,35 @@
 package ru.ifmo.lab5;
 
+import jakarta.xml.bind.JAXBException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import ru.ifmo.lab5.commands.ExecuteScriptCommand;
 import ru.ifmo.lab5.managers.*;
+import ru.ifmo.lab5.model.Person;
 import ru.ifmo.lab5.util.CommandCompleter;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.TreeSet;
-import ru.ifmo.lab5.model.Person;
-import jakarta.xml.bind.JAXBException;
 
 /**
- * Главный класс приложения. Инициализирует все компоненты и запускает консольное приложение.
+ * Главный класс приложения.
+ * Инициализирует все компоненты: менеджеры, JLine для консольного ввода,
+ * регистрирует команды и запускает основной цикл обработки команд.
  */
 public class Main {
     /**
      * Точка входа в программу.
-     * Инициализирует менеджеры, JLine для консольного ввода, регистрирует команды
-     * и запускает основной цикл обработки команд.
-     * Ожидает путь к файлу коллекции через переменную окружения PERSON_COLLECTION_FILE.
+     * <p>
+     * Выполняет следующие шаги:
+     * 1. Проверяет наличие переменной окружения с путем к файлу коллекции.
+     * 2. Инициализирует JLine Terminal.
+     * 3. Создает {@link XmlFileManager} и {@link CollectionManager}.
+     * 4. Загружает коллекцию из файла, обрабатывая возможные ошибки.
+     * 5. Создает {@link CommandManager}, {@link UserInputHandler}, {@link ScriptRunner}.
+     * 6. Создает {@link ConsoleApplication} и регистрирует в нем все команды.
+     * 7. Запускает главный цикл приложения.
      *
      * @param args аргументы командной строки (не используются).
      */
@@ -29,42 +38,34 @@ public class Main {
         if (filePath == null || filePath.trim().isEmpty()) {
             System.err.println("Ошибка: Переменная окружения PERSON_COLLECTION_FILE не установлена или пуста.");
             System.err.println("Пожалуйста, установите ее и укажите путь к XML файлу коллекции.");
-            System.err.println("Пример (Linux/macOS): export PERSON_COLLECTION_FILE=\"/путь/к/вашему/файлу.xml\"");
-            System.err.println("Пример (Windows CMD): set PERSON_COLLECTION_FILE=\"C:\\путь\\к\\вашему\\файлу.xml\"");
-            System.err.println("Пример (Windows PowerShell): $env:PERSON_COLLECTION_FILE=\"C:\\путь\\к\\вашему\\файлу.xml\"");
+            System.err.println("Пример (Linux/macOS): export PERSON_COLLECTION_FILE=\"/path/to/your/file.xml\"");
+            System.err.println("Пример (Windows CMD): set PERSON_COLLECTION_FILE=\"C:\\path\\to\\your\\file.xml\"");
+            System.err.println("Пример (Windows PowerShell): $env:PERSON_COLLECTION_FILE=\"C:\\path\\to\\your\\file.xml\"");
             return;
         }
 
-        Terminal terminal = null;
-
-        try {
-            // 1. Создаем Terminal
-            terminal = TerminalBuilder.builder().system(true).build();
-
-            // 2. Создаем базовые менеджеры
+        try (Terminal terminal = TerminalBuilder.builder().system(true).build()) {
+            // 1. Создание базовых менеджеров
             CollectionManager collectionManager = new CollectionManager();
             XmlFileManager xmlFileManager = new XmlFileManager(filePath);
 
+            // 2. Загрузка коллекции из файла
             try {
                 TreeSet<Person> loadedCollection = xmlFileManager.load();
                 collectionManager.setCollection(loadedCollection);
                 System.out.println("Коллекция успешно загружена. Загружено элементов: " + loadedCollection.size());
-            } catch (FileNotFoundException e) { // Это не ошибка, а первое создание
+            } catch (FileNotFoundException e) {
                 System.out.println("Файл коллекции не найден. Будет создана новая пустая коллекция.");
             } catch (JAXBException | IOException | SecurityException e) {
                 System.err.println("Критическая ошибка при загрузке коллекции из файла: " + e.getMessage());
                 System.err.println("Программа будет завершена, так как начальное состояние не может быть загружено.");
-                return; // Выход из программы при невозможности загрузить файл
+                return; // Выход из программы при критической ошибке
             }
 
-
-            // 3. CommandManager
+            // 3. Создание остальных менеджеров и компонентов
             CommandManager commandManager = new CommandManager(collectionManager, xmlFileManager);
-
-            // 4. Создаем наш кастомный CommandCompleter СРАЗУ после CommandManager
             CommandCompleter commandCompleter = new CommandCompleter(commandManager);
 
-            // 5. Создаем LineReader и СРАЗУ устанавливаем ему наш CommandCompleter
             LineReader lineReader = LineReaderBuilder.builder()
                     .terminal(terminal)
                     .completer(commandCompleter)
@@ -72,58 +73,24 @@ public class Main {
                     .variable(LineReader.HISTORY_FILE, ".person_app_history")
                     .build();
 
-            // 6. Создаем UserInputHandler с готовым LineReader
             UserInputHandler userInputHandler = new UserInputHandler(lineReader);
-
-            // 7. Создаем ScriptRunner
-            ScriptRunner scriptRunner = new ScriptRunner(commandManager); // Убрали terminal из конструктора
+            ScriptRunner scriptRunner = new ScriptRunner(commandManager);
             commandManager.setScriptRunner(scriptRunner);
 
-            // 8. Создаем ConsoleApplication
-            ConsoleApplication app = new ConsoleApplication( // Объявляем и инициализируем здесь
-                    collectionManager,
+            // 4. Создание и запуск приложения
+            ConsoleApplication app = new ConsoleApplication(
                     commandManager,
-                    xmlFileManager,
                     userInputHandler,
-                    lineReader,
-                    terminal
+                    lineReader
             );
 
-            // 9. Регистрируем ВСЕ команды через ConsoleApplication
             app.registerCommands();
-            commandManager.register("execute_script", new ExecuteScriptCommand(scriptRunner));
-
-            // 10. Комплетер уже установлен.
-
             app.run();
 
         } catch (IOException e) {
-            System.err.println("Критическая ошибка при инициализации JLine терминала: " + e.getMessage());
-            logError(e); // Используем свой метод логирования
-        } catch (Exception e) { // Общий перехват на случай других ошибок инициализации
+            System.err.println("Критическая ошибка при инициализации или закрытии JLine терминала: " + e.getMessage());
+        } catch (Exception e) {
             System.err.println("Непредвиденная критическая ошибка при запуске приложения: " + e.getMessage());
-            logError(e);
-        }
-        finally {
-            if (terminal != null) {
-                try {
-                    terminal.close();
-                } catch (IOException e) {
-                    System.err.println("Ошибка при закрытии терминала: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Вспомогательный метод для логирования исключений в Main.
-     * @param e Исключение для логирования.
-     */
-    private static void logError(Exception e) {
-        // В реальном приложении здесь мог бы быть вызов логгера
-        System.err.println("Подробности ошибки: ");
-        for (StackTraceElement ste : e.getStackTrace()) {
-            System.err.println("\t_ " + ste.toString());
         }
     }
 }

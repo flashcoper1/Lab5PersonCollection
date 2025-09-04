@@ -1,15 +1,16 @@
 package ru.ifmo.lab5.commands;
 
 import ru.ifmo.lab5.managers.CollectionManager;
+import ru.ifmo.lab5.util.CommandResult;
 
 /**
- * Команда для удаления элемента из коллекции по ID.
+ * Команда для удаления элемента из коллекции по его ID.
  */
 public class RemoveByIdCommand implements Command {
     private final CollectionManager collectionManager;
 
     /**
-     * Конструктор.
+     * Конструктор команды.
      * @param collectionManager Менеджер коллекции.
      */
     public RemoveByIdCommand(CollectionManager collectionManager) {
@@ -17,20 +18,19 @@ public class RemoveByIdCommand implements Command {
     }
 
     @Override
-    public void execute(String arguments) {
+    public CommandResult execute(String arguments) {
         if (arguments == null || arguments.trim().isEmpty()) {
-            System.err.println("Ошибка: Необходимо указать ID элемента для удаления.");
-            return;
+            return CommandResult.error("Необходимо указать ID элемента для удаления.");
         }
         try {
             long id = Long.parseLong(arguments.trim());
             if (collectionManager.removeById(id)) {
-                System.out.println("Человек с ID " + id + " успешно удален.");
+                return CommandResult.success("Человек с ID " + id + " успешно удален.");
             } else {
-                System.err.println("Ошибка: Человек с ID " + id + " не найден.");
+                return CommandResult.error("Человек с ID " + id + " не найден.");
             }
         } catch (NumberFormatException e) {
-            System.err.println("Ошибка: ID должен быть числом.");
+            return CommandResult.error("ID должен быть числом.");
         }
     }
 

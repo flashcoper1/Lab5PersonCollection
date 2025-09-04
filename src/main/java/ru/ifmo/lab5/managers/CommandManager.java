@@ -8,6 +8,7 @@ import java.util.Scanner; // Был для старого ScriptRunner, тепе
 
 /**
  * Управляет регистрацией и вызовом команд.
+ * Хранит карту команд, сопоставляя их имена с объектами команд.
  */
 public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
@@ -16,9 +17,9 @@ public class CommandManager {
     private ScriptRunner scriptRunner; // Теперь устанавливается сеттером
 
     /**
-     * Конструктор.
-     * @param collectionManager Менеджер коллекции.
-     * @param xmlFileManager Менеджер файлов.
+     * Конструктор менеджера команд.
+     * @param collectionManager Менеджер коллекции, передается командам.
+     * @param xmlFileManager Менеджер файлов, передается командам.
      */
     public CommandManager(CollectionManager collectionManager, XmlFileManager xmlFileManager) {
         this.collectionManager = collectionManager;
@@ -28,7 +29,7 @@ public class CommandManager {
     }
 
     /**
-     * Устанавливает исполнителя скриптов.
+     * Устанавливает исполнителя скриптов. Необходимо для команды execute_script.
      * @param scriptRunner Исполнитель скриптов.
      */
     public void setScriptRunner(ScriptRunner scriptRunner) {
